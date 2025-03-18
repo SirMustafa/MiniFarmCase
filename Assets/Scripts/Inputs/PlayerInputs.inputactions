@@ -1,0 +1,34 @@
+{
+    "name": "PlayerInputs",
+    "maps": [
+        {
+            "name": "General",
+            "id": "14413afe-fb4a-4d62-bf14-1ff6411b53ad",
+            "actions": [
+                {
+                    "name": "LMB",
+                    "type": "Button",
+                    "id": "a9f6ed79-2d5b-4711-be88-c70c98335eb9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "3bbd7a9c-d0f5-44b0-814b-32e9996b06df",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LMB",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
