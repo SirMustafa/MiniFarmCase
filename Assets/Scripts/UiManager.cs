@@ -79,5 +79,7 @@ public class UiManager : MonoBehaviour
     {
         optionsPanel.gameObject.SetActive(false);
         buildingPanelDisposable.Dispose();
+        currentBuilding.isPanelOpened = false;
+        currentBuilding = null;
     }
 }

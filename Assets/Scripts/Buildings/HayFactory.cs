@@ -6,9 +6,12 @@ using UnityEngine;
 
 public class HayFactory : BuildingsBase
 {
-    [SerializeField] private float productionTime; 
-    [SerializeField] private int capacity; 
-    private bool isProducing; 
+    [SerializeField] private float productionTime = 40f;
+    [SerializeField] private int capacity = 10;
+
+    private bool isProducingFlag = false;
+    public override bool IsProducing => isProducingFlag;
+
     public override float ProductionTime => productionTime;
     public override int Capacity => capacity;
 
@@ -19,56 +22,29 @@ public class HayFactory : BuildingsBase
 
     protected override async void ProduceResources()
     {
-        if (isProducing) return;
-        isProducing = true;
-
-        while (InternalStorage.Value < capacity)
+        if (isProducingFlag) return;
+        isProducingFlag = true;
+        while (InternalStorage.Value < Capacity)
         {
             float timer = 0f;
-
-            while (timer < productionTime)
+            while (timer < ProductionTime)
             {
-                ProductionProgress.Value = timer / productionTime;
+                ProductionProgress.Value = timer / ProductionTime;
                 await UniTask.Yield();
                 timer += Time.deltaTime;
             }
-
-            InternalStorage.Value++;
             ProductionProgress.Value = 0f;
+            InternalStorage.Value++;
         }
-
-        isProducing = false;
+        isProducingFlag = false;
     }
 
-    public override void OnClick()
-    {
-        if (!isPanelOpened)
-        {
-            base.OnClick();
-            isPanelOpened = true;
-        }
-        else
-        {
-            CollectResources();
-
-            if (!isProducing)
-            {
-                ProduceResources();
-            }
-        }
-    }
-
-    public void CollectResources()
+    public override void CollectResources()
     {
         Storage.WheatCount.Value += InternalStorage.Value;
         InternalStorage.Value = 0;
     }
 
-    public override void EnqueueProductionOrder()
-    {
-    }
-
-    public override void CancelProductionOrder()
-    {
-    }
+    public override void EnqueueProductionOrder() { }
+    public override void CancelProductionOrder() { }
 }
