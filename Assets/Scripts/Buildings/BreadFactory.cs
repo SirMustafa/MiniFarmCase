@@ -1,34 +1,44 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-public class BreadFactory : BuildingsBase
+public class BreadFactory : BuildingsBase, INeedResource
 {
-    [SerializeField] private float productionTime = 40f;
-    [SerializeField] private int breadCostPerOrder = 1;
-    [SerializeField] private int maxProductionQueue = 10;
+    [Header("BuildStats")]
+    [SerializeField] private float _productionTime;
+    [SerializeField] private int _sourceCostPerOrder;
+    [SerializeField] private int _maxProductionQueue;
+    [SerializeField] private int _outputResource;
+    [SerializeField] private Sprite _neededResource;
+    private bool _isProducingFlag = false;
+
     public ReactiveProperty<int> ProductionQueue { get; private set; } = new ReactiveProperty<int>(0);
+    public override float ProductionTime => _productionTime;
+    public override int Capacity => _maxProductionQueue;
+    public override bool IsProducing => _isProducingFlag;
+    public override int OutPutResourceAmount => _outputResource;
 
-    public override float ProductionTime => productionTime;
-    public override int Capacity => maxProductionQueue;
+    public Sprite NeededResourceSprite() => _neededResource;
 
-    private bool isProducingFlag = false;
-    public override bool IsProducing => isProducingFlag;
+    public int InputResource() => _sourceCostPerOrder;
+
+    public int OutputResource() => _outputResource;
 
     public override void EnqueueProductionOrder()
     {
-        if (ProductionQueue.Value >= maxProductionQueue || InternalStorage.Value >= Capacity)
+        if (ProductionQueue.Value >= _maxProductionQueue || InternalStorage.Value >= Capacity)
             return;
 
-        if (Storage.FlourCount.Value < breadCostPerOrder)
+        if (Storage.FlourCount.Value < _sourceCostPerOrder)
             return;
         ProductionQueue.Value++;
-        if (!isProducingFlag)
+        if (!_isProducingFlag)
             ProduceResources();
     }
 
-    public override void CancelProductionOrder()
+    public override void DequeueProductionOrder()
     {
         if (ProductionQueue.Value > 0)
             ProductionQueue.Value--;
@@ -38,10 +48,16 @@ public class BreadFactory : BuildingsBase
 
     protected override async void ProduceResources()
     {
-        if (isProducingFlag) return;
-        isProducingFlag = true;
-        await ProcessProductionQueue(ProductionQueue, Storage.FlourCount, breadCostPerOrder, Storage.BreadCount);
-        isProducingFlag = false;
+        if (_isProducingFlag)
+            return;
+
+        _isProducingFlag = true;
+        await ProcessProductionQueue(ProductionQueue, Storage.FlourCount, _sourceCostPerOrder);
+
+        if (InternalStorage.Value >= Capacity)
+            ProductionProgress.Value = 1f;
+
+        _isProducingFlag = false;
     }
 
     public override void CollectResources()

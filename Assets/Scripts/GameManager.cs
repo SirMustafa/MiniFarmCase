@@ -1,18 +1,34 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private DateTime focusLostTime;
+    private bool hasRecorded = false;
+
+    private void Awake()
     {
-        
+        Storage.Load();
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnApplicationFocus(bool hasFocus)
     {
-        
+        if (!hasFocus)
+        {
+            focusLostTime = DateTime.UtcNow;
+            hasRecorded = true;
+        }
+        else if (hasFocus && hasRecorded)
+        {
+            DateTime focusGainedTime = DateTime.UtcNow;
+            TimeSpan elapsed = focusGainedTime - focusLostTime;
+            hasRecorded = false;
+
+            //ProductionManager.UiManagerInstance.AdvanceAllBuildings((float)elapsed.TotalSeconds);
+
+            Storage.Save();
+        }
     }
 }

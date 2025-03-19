@@ -1,19 +1,21 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 public class HayFactory : BuildingsBase
 {
+    [Header("BuildStats")]
     [SerializeField] private float productionTime = 40f;
     [SerializeField] private int capacity = 10;
+    [SerializeField] private int _output = 1;
 
     private bool isProducingFlag = false;
     public override bool IsProducing => isProducingFlag;
-
     public override float ProductionTime => productionTime;
     public override int Capacity => capacity;
+    public override int OutPutResourceAmount => _output;
 
     private void Start()
     {
@@ -24,6 +26,7 @@ public class HayFactory : BuildingsBase
     {
         if (isProducingFlag) return;
         isProducingFlag = true;
+
         while (InternalStorage.Value < Capacity)
         {
             float timer = 0f;
@@ -36,6 +39,10 @@ public class HayFactory : BuildingsBase
             ProductionProgress.Value = 0f;
             InternalStorage.Value++;
         }
+        if (InternalStorage.Value >= Capacity)
+        {
+            ProductionProgress.Value = 1f;
+        }
         isProducingFlag = false;
     }
 
@@ -46,5 +53,5 @@ public class HayFactory : BuildingsBase
     }
 
     public override void EnqueueProductionOrder() { }
-    public override void CancelProductionOrder() { }
+    public override void DequeueProductionOrder() { }
 }

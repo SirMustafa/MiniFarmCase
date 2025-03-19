@@ -1,13 +1,12 @@
 using TMPro;
 using UniRx;
 using Cysharp.Threading.Tasks;
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UiManager : MonoBehaviour
 {
-    public static UiManager UiManagerInstance;
+    public static UiManager UiManagerInstance { get; private set; }
 
     [SerializeField] private TextMeshProUGUI wheatCountTxt;
     [SerializeField] private TextMeshProUGUI flourCountTxt;
@@ -15,54 +14,75 @@ public class UiManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI productionAmountTxt;
     [SerializeField] private TextMeshProUGUI producingInfoTxt;
     [SerializeField] private Slider productionSlider;
-
     [SerializeField] private RectTransform optionsPanel;
+    [SerializeField] private TextMeshProUGUI increaseBtnCount;
+    [SerializeField] private Image increaseBtnImg;
     [SerializeField] private Camera mainCam;
 
     private BuildingsBase currentBuilding;
-    private CompositeDisposable buildingPanelDisposable = new CompositeDisposable();
+    private CompositeDisposable panelSubscriptions = new CompositeDisposable();
 
     private void Awake()
     {
-        if (UiManagerInstance == null) UiManagerInstance = this;
+        if (UiManagerInstance is null) UiManagerInstance = this;
+        else Destroy(gameObject);
     }
 
     private void Start()
     {
-        Storage.WheatCount.Subscribe(count => wheatCountTxt.SetText("{0}", count)).AddTo(this);
-        Storage.FlourCount.Subscribe(count => flourCountTxt.SetText("{0}", count)).AddTo(this);
-        Storage.BreadCount.Subscribe(count => breadCountTxt.SetText("{0}", count)).AddTo(this);
+        Storage.WheatCount.Subscribe(count => wheatCountTxt.text = count.ToString()).AddTo(this);
+        Storage.FlourCount.Subscribe(count => flourCountTxt.text = count.ToString()).AddTo(this);
+        Storage.BreadCount.Subscribe(count => breadCountTxt.text = count.ToString()).AddTo(this);
     }
 
     public void ShowBuildingPanel(BuildingsBase building)
     {
-        if (currentBuilding is not null && currentBuilding != building)
-        {
-            currentBuilding.isPanelOpened = false;
-        }
+        if (currentBuilding != null && currentBuilding != building) currentBuilding.IsPanelOpened = false;
 
-        buildingPanelDisposable.Dispose();
-        buildingPanelDisposable = new CompositeDisposable();
+        panelSubscriptions.Dispose();
+        panelSubscriptions = new CompositeDisposable();
 
         optionsPanel.gameObject.SetActive(true);
         optionsPanel.position = mainCam.WorldToScreenPoint(building.transform.position);
         currentBuilding = building;
 
-        currentBuilding.ProductionProgress.Subscribe(progress =>
+        Observable.CombineLatest(currentBuilding.ProductionProgress,currentBuilding.InternalStorage,(progress, storage) => new { progress, storage })
+        .Subscribe(x => UpdateBuildingPanelUI(x.progress, x.storage, currentBuilding))
+        .AddTo(panelSubscriptions);
+
+        if (currentBuilding is INeedResource resourceNeed)
         {
-            productionAmountTxt.text = currentBuilding.InternalStorage.Value.ToString();
-            if (currentBuilding.InternalStorage.Value >= currentBuilding.Capacity)
-            {
-                producingInfoTxt.text = "Full";
-                productionSlider.value = 1f;
-            }
-            else
-            {
-                int remainingSeconds = Mathf.CeilToInt(currentBuilding.ProductionTime * (1 - progress));
-                producingInfoTxt.text = $"{remainingSeconds} sn";
-                productionSlider.value = progress;
-            }
-        }).AddTo(buildingPanelDisposable);
+            increaseBtnImg.gameObject.SetActive(true);
+            increaseBtnCount.gameObject.SetActive(true);
+            increaseBtnImg.sprite = resourceNeed.NeededResourceSprite();
+            increaseBtnCount.text = resourceNeed.InputResource().ToString();
+        }
+        else
+        {
+            increaseBtnImg.gameObject.SetActive(false);
+            increaseBtnCount.gameObject.SetActive(false);
+        }
+    }
+
+    private void UpdateBuildingPanelUI(float progress, int storage, BuildingsBase building)
+    {
+        productionSlider.value = progress;
+        productionAmountTxt.text = storage.ToString();
+
+        if (storage >= building.Capacity)
+        {
+            productionSlider.value = 1f;
+            producingInfoTxt.text = "Full";
+        }
+        else if (!building.IsProducing)
+        {
+            producingInfoTxt.text = $"{Mathf.CeilToInt(building.ProductionTime)} s";
+        }
+        else
+        {
+            int remainingSeconds = Mathf.CeilToInt(building.ProductionTime * (1 - progress));
+            producingInfoTxt.text = $"{remainingSeconds} s";
+        }
     }
 
     public void IncreaseProduce()
@@ -72,14 +92,18 @@ public class UiManager : MonoBehaviour
 
     public void DecreaseProduce()
     {
-        currentBuilding?.CancelProductionOrder();
+        currentBuilding?.DequeueProductionOrder();
     }
 
     public void HideBuildingPanel()
     {
         optionsPanel.gameObject.SetActive(false);
-        buildingPanelDisposable.Dispose();
-        currentBuilding.isPanelOpened = false;
-        currentBuilding = null;
+        panelSubscriptions.Dispose();
+
+        if (currentBuilding is not null)
+        {
+            currentBuilding.IsPanelOpened = false;
+            currentBuilding = null;
+        }
     }
 }

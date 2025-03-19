@@ -1,5 +1,5 @@
 using Cysharp.Threading.Tasks;
-using System;
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UniRx;
@@ -7,48 +7,40 @@ using UnityEngine;
 
 public abstract class BuildingsBase : MonoBehaviour, IClickable
 {
-    public ReactiveProperty<int> InternalStorage { get; private set; } = new ReactiveProperty<int>(0);
-    public ReactiveProperty<float> ProductionProgress { get; private set; } = new ReactiveProperty<float>(0f);
-    public bool isPanelOpened;
-
+    public ReactiveProperty<int> InternalStorage { get; } = new ReactiveProperty<int>(0);
+    public ReactiveProperty<float> ProductionProgress { get; } = new ReactiveProperty<float>(0f);
+    public bool IsPanelOpened { get; set; }
     public abstract float ProductionTime { get; }
     public abstract int Capacity { get; }
-
-    public abstract void EnqueueProductionOrder();
-    public abstract void CancelProductionOrder();
-    protected abstract void ProduceResources();
-
-    public abstract void CollectResources();
-
+    public abstract int OutPutResourceAmount { get; }
     public abstract bool IsProducing { get; }
+    public abstract void EnqueueProductionOrder();
+    public abstract void DequeueProductionOrder();
+    protected abstract void ProduceResources();
+    public abstract void CollectResources();
 
     public virtual void OnClick()
     {
-        if (!isPanelOpened)
+        if (!IsPanelOpened)
         {
             UiManager.UiManagerInstance.ShowBuildingPanel(this);
-            isPanelOpened = true;
+            IsPanelOpened = true;
         }
         else
         {
             CollectResources();
             if (!IsProducing)
-            {
                 ProduceResources();
-            }
         }
     }
 
-    protected async UniTask ProcessProductionQueue(
-        ReactiveProperty<int> productionQueue,
-        ReactiveProperty<int> inputResource,
-        int costPerOrder,
-        ReactiveProperty<int> outputResource)
+    protected async UniTask ProcessProductionQueue(ReactiveProperty<int> productionQueue, ReactiveProperty<int> inputResource, int costPerOrder)
     {
         while (productionQueue.Value > 0)
         {
             if (inputResource.Value < costPerOrder)
                 break;
+
             inputResource.Value -= costPerOrder;
 
             float timer = 0f;
@@ -59,7 +51,6 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
                 timer += Time.deltaTime;
             }
             ProductionProgress.Value = 0f;
-            outputResource.Value++;
             InternalStorage.Value++;
             productionQueue.Value--;
         }
