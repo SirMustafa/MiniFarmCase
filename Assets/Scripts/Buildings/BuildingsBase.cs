@@ -10,10 +10,12 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     public ReactiveProperty<int> InternalStorage { get; } = new ReactiveProperty<int>(0);
     public ReactiveProperty<float> ProductionProgress { get; } = new ReactiveProperty<float>(0f);
     public bool IsPanelOpened { get; set; }
+
     public abstract float ProductionTime { get; }
     public abstract int Capacity { get; }
     public abstract int OutPutResourceAmount { get; }
     public abstract bool IsProducing { get; }
+
     public abstract void EnqueueProductionOrder();
     public abstract void DequeueProductionOrder();
     protected abstract void ProduceResources();

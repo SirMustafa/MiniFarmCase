@@ -31,7 +31,7 @@ public class BreadFactory : BuildingsBase, INeedResource
         if (ProductionQueue.Value >= _maxProductionQueue || InternalStorage.Value >= Capacity)
             return;
 
-        if (Storage.FlourCount.Value < _sourceCostPerOrder)
+        if (StorageManager.FlourCount.Value < _sourceCostPerOrder)
             return;
         ProductionQueue.Value++;
         if (!_isProducingFlag)
@@ -52,7 +52,7 @@ public class BreadFactory : BuildingsBase, INeedResource
             return;
 
         _isProducingFlag = true;
-        await ProcessProductionQueue(ProductionQueue, Storage.FlourCount, _sourceCostPerOrder);
+        await ProcessProductionQueue(ProductionQueue, StorageManager.FlourCount, _sourceCostPerOrder);
 
         if (InternalStorage.Value >= Capacity)
             ProductionProgress.Value = 1f;
@@ -62,7 +62,7 @@ public class BreadFactory : BuildingsBase, INeedResource
 
     public override void CollectResources()
     {
-        Storage.BreadCount.Value += InternalStorage.Value;
+        StorageManager.BreadCount.Value += InternalStorage.Value;
         InternalStorage.Value = 0;
     }
 }

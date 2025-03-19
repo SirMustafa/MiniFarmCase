@@ -48,7 +48,7 @@ public class HayFactory : BuildingsBase
 
     public override void CollectResources()
     {
-        Storage.WheatCount.Value += InternalStorage.Value;
+        StorageManager.WheatCount.Value += InternalStorage.Value;
         InternalStorage.Value = 0;
     }
 

@@ -30,9 +30,9 @@ public class UiManager : MonoBehaviour
 
     private void Start()
     {
-        Storage.WheatCount.Subscribe(count => wheatCountTxt.text = count.ToString()).AddTo(this);
-        Storage.FlourCount.Subscribe(count => flourCountTxt.text = count.ToString()).AddTo(this);
-        Storage.BreadCount.Subscribe(count => breadCountTxt.text = count.ToString()).AddTo(this);
+        StorageManager.WheatCount.Subscribe(count => wheatCountTxt.text = count.ToString()).AddTo(this);
+        StorageManager.FlourCount.Subscribe(count => flourCountTxt.text = count.ToString()).AddTo(this);
+        StorageManager.BreadCount.Subscribe(count => breadCountTxt.text = count.ToString()).AddTo(this);
     }
 
     public void ShowBuildingPanel(BuildingsBase building)

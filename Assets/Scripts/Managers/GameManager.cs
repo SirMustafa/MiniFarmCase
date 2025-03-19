@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        Storage.Load();
+        StorageManager.Load();
     }
 
     void OnApplicationFocus(bool hasFocus)
@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
 
             //ProductionManager.UiManagerInstance.AdvanceAllBuildings((float)elapsed.TotalSeconds);
 
-            Storage.Save();
+            StorageManager.Save();
         }
     }
 }

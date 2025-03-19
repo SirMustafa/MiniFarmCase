@@ -1,7 +1,7 @@
 using UniRx;
 using UnityEngine;
 
-public static class Storage
+public static class StorageManager
 {
     public static ReactiveProperty<int> WheatCount { get; } = new ReactiveProperty<int>(0);
     public static ReactiveProperty<int> FlourCount { get; } = new ReactiveProperty<int>(0);

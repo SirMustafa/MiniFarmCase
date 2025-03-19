@@ -36,7 +36,7 @@ public class FlourFactory : BuildingsBase, INeedResource
         if (ProductionQueue.Value >= _maxProductionQueue || InternalStorage.Value >= Capacity)
             return;
 
-        if (Storage.WheatCount.Value < _sourceCostPerOrder)
+        if (StorageManager.WheatCount.Value < _sourceCostPerOrder)
             return;
 
         ProductionQueue.Value++;
@@ -58,7 +58,7 @@ public class FlourFactory : BuildingsBase, INeedResource
             return;
 
         _isProducingFlag = true;
-        await ProcessProductionQueue(ProductionQueue, Storage.WheatCount, _sourceCostPerOrder);
+        await ProcessProductionQueue(ProductionQueue, StorageManager.WheatCount, _sourceCostPerOrder);
 
         if (InternalStorage.Value >= Capacity)
             ProductionProgress.Value = 1f;
@@ -68,7 +68,7 @@ public class FlourFactory : BuildingsBase, INeedResource
 
     public override void CollectResources()
     {
-        Storage.FlourCount.Value += InternalStorage.Value;
+        StorageManager.FlourCount.Value += InternalStorage.Value;
         InternalStorage.Value = 0;
     }
 }
