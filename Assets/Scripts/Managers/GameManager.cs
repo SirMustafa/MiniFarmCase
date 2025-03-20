@@ -13,22 +13,24 @@ public class GameManager : MonoBehaviour
         StorageManager.Load();
     }
 
-    void OnApplicationFocus(bool hasFocus)
+    private void OnApplicationFocus(bool hasFocus)
     {
         if (!hasFocus)
         {
             focusLostTime = DateTime.UtcNow;
             hasRecorded = true;
+            StorageManager.Save();
         }
         else if (hasFocus && hasRecorded)
         {
             DateTime focusGainedTime = DateTime.UtcNow;
             TimeSpan elapsed = focusGainedTime - focusLostTime;
             hasRecorded = false;
-
-            //ProductionManager.UiManagerInstance.AdvanceAllBuildings((float)elapsed.TotalSeconds);
-
-            StorageManager.Save();
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        StorageManager.Save();
     }
 }

@@ -8,36 +8,51 @@ public class UiManager : MonoBehaviour
 {
     public static UiManager UiManagerInstance { get; private set; }
 
+    [Header("GeneralStuff")]
+    [SerializeField] private RectTransform optionsPanel;
+    [SerializeField] private Camera mainCam;
+
+    [Header("Storage")]
     [SerializeField] private TextMeshProUGUI wheatCountTxt;
     [SerializeField] private TextMeshProUGUI flourCountTxt;
     [SerializeField] private TextMeshProUGUI breadCountTxt;
+
+    [Header("SliderPanel")]
     [SerializeField] private TextMeshProUGUI productionAmountTxt;
     [SerializeField] private TextMeshProUGUI producingInfoTxt;
     [SerializeField] private Slider productionSlider;
-    [SerializeField] private RectTransform optionsPanel;
+    [SerializeField] private Image currentImg;
+    [SerializeField] private TextMeshProUGUI currentQueueTxt;
+    [SerializeField] private TextMeshProUGUI maxQueueTxt;
+    [SerializeField] private TextMeshProUGUI slideTxt;
+
+    [Header("OrderBtn")]
     [SerializeField] private TextMeshProUGUI increaseBtnCount;
     [SerializeField] private Image increaseBtnImg;
-    [SerializeField] private Camera mainCam;
+    [SerializeField] private Button increaseBtn;
+    [SerializeField] private Button decreaseBtn;
 
     private BuildingsBase currentBuilding;
     private CompositeDisposable panelSubscriptions = new CompositeDisposable();
 
     private void Awake()
     {
-        if (UiManagerInstance is null) UiManagerInstance = this;
-        else Destroy(gameObject);
+        if (UiManagerInstance == null)
+            UiManagerInstance = this;
+        else
+            Destroy(gameObject);
     }
 
     private void Start()
     {
-        StorageManager.WheatCount.Subscribe(count => wheatCountTxt.text = count.ToString()).AddTo(this);
-        StorageManager.FlourCount.Subscribe(count => flourCountTxt.text = count.ToString()).AddTo(this);
-        StorageManager.BreadCount.Subscribe(count => breadCountTxt.text = count.ToString()).AddTo(this);
+        StorageManager.GetResourceProperty(StorageManager.ResourceType.Wheat).Subscribe(count => wheatCountTxt.text = count.ToString()).AddTo(this);
+        StorageManager.GetResourceProperty(StorageManager.ResourceType.Flour).Subscribe(count => flourCountTxt.text = count.ToString()).AddTo(this);
+        StorageManager.GetResourceProperty(StorageManager.ResourceType.Bread).Subscribe(count => breadCountTxt.text = count.ToString()).AddTo(this);
     }
 
     public void ShowBuildingPanel(BuildingsBase building)
     {
-        if (currentBuilding != null && currentBuilding != building) currentBuilding.IsPanelOpened = false;
+        if (currentBuilding is not null && currentBuilding != building) currentBuilding.IsPanelOpened = false;
 
         panelSubscriptions.Dispose();
         panelSubscriptions = new CompositeDisposable();
@@ -46,19 +61,45 @@ public class UiManager : MonoBehaviour
         optionsPanel.position = mainCam.WorldToScreenPoint(building.transform.position);
         currentBuilding = building;
 
-        Observable.CombineLatest(currentBuilding.ProductionProgress,currentBuilding.InternalStorage,(progress, storage) => new { progress, storage })
-        .Subscribe(x => UpdateBuildingPanelUI(x.progress, x.storage, currentBuilding))
-        .AddTo(panelSubscriptions);
+        Observable.CombineLatest(currentBuilding.ProductionProgress, currentBuilding.InternalStorage,
+            (progress, storage) => new { progress, storage })
+            .Subscribe(x => UpdateBuildingPanelUI(x.progress, x.storage, currentBuilding))
+            .AddTo(panelSubscriptions);
 
-        if (currentBuilding is INeedResource resourceNeed)
+        if (currentBuilding is ResourceRequiringBuilding)
         {
-            increaseBtnImg.gameObject.SetActive(true);
-            increaseBtnCount.gameObject.SetActive(true);
-            increaseBtnImg.sprite = resourceNeed.NeededResourceSprite();
-            increaseBtnCount.text = resourceNeed.InputResource().ToString();
+            maxQueueTxt.gameObject.SetActive(true);
+            currentQueueTxt.gameObject.SetActive(true);
+            slideTxt.gameObject.SetActive(true);
         }
         else
         {
+            maxQueueTxt.gameObject.SetActive(false);
+            currentQueueTxt.gameObject.SetActive(false);
+            slideTxt.gameObject.SetActive(false);
+        }
+
+        currentImg.sprite = currentBuilding.ProductionSprite;
+
+        if (currentBuilding is ResourceRequiringBuilding resourceBuilding)
+        {
+            increaseBtn.gameObject.SetActive(true);
+            decreaseBtn.gameObject.SetActive(true);
+            increaseBtnImg.gameObject.SetActive(true);
+            increaseBtnCount.gameObject.SetActive(true);
+
+            increaseBtnImg.sprite = resourceBuilding.NeededResourceSprite;
+            increaseBtnCount.text = resourceBuilding.InputCostPerOrder.ToString();
+
+            maxQueueTxt.text = currentBuilding.ProductionQueueCapacity.ToString();
+            currentBuilding.ProductionQueue
+                .Subscribe(queue => currentQueueTxt.text = queue.ToString())
+                .AddTo(panelSubscriptions);
+        }
+        else
+        {
+            increaseBtn.gameObject.SetActive(false);
+            decreaseBtn.gameObject.SetActive(false);
             increaseBtnImg.gameObject.SetActive(false);
             increaseBtnCount.gameObject.SetActive(false);
         }
@@ -69,7 +110,7 @@ public class UiManager : MonoBehaviour
         productionSlider.value = progress;
         productionAmountTxt.text = storage.ToString();
 
-        if (storage >= building.Capacity)
+        if (storage >= building.ProductionQueueCapacity)
         {
             productionSlider.value = 1f;
             producingInfoTxt.text = "Full";
@@ -87,12 +128,14 @@ public class UiManager : MonoBehaviour
 
     public void IncreaseProduce()
     {
-        currentBuilding?.EnqueueProductionOrder();
+        if (currentBuilding is ResourceRequiringBuilding resourceBuilding)
+            resourceBuilding.EnqueueProductionOrder();
     }
 
     public void DecreaseProduce()
     {
-        currentBuilding?.DequeueProductionOrder();
+        if (currentBuilding is ResourceRequiringBuilding resourceBuilding)
+            resourceBuilding.DequeueProductionOrder();
     }
 
     public void HideBuildingPanel()
@@ -100,7 +143,7 @@ public class UiManager : MonoBehaviour
         optionsPanel.gameObject.SetActive(false);
         panelSubscriptions.Dispose();
 
-        if (currentBuilding is not null)
+        if (currentBuilding != null)
         {
             currentBuilding.IsPanelOpened = false;
             currentBuilding = null;

@@ -9,17 +9,27 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
 {
     public ReactiveProperty<int> InternalStorage { get; } = new ReactiveProperty<int>(0);
     public ReactiveProperty<float> ProductionProgress { get; } = new ReactiveProperty<float>(0f);
-    public bool IsPanelOpened { get; set; }
+    public ReactiveProperty<int> ProductionQueue { get; protected set; } = new ReactiveProperty<int>(0);
 
-    public abstract float ProductionTime { get; }
-    public abstract int Capacity { get; }
-    public abstract int OutPutResourceAmount { get; }
+    public abstract StorageManager.ResourceType OutputResourceType { get; }
+    public abstract Sprite ProductionSprite { get; }
     public abstract bool IsProducing { get; }
+    public abstract float ProductionTime { get; }
+    public abstract int OutputResourceAmount { get; }
+    public abstract int ProductionQueueCapacity { get; }
 
-    public abstract void EnqueueProductionOrder();
-    public abstract void DequeueProductionOrder();
+    public bool IsPanelOpened { get; set; }
+    protected Tween productionTween;
+    private float _initialY;
+
     protected abstract void ProduceResources();
     public abstract void CollectResources();
+
+
+    private void Awake()
+    {
+        _initialY = transform.localScale.y;
+    }
 
     public virtual void OnClick()
     {
@@ -31,30 +41,40 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
         else
         {
             CollectResources();
-            if (!IsProducing)
-                ProduceResources();
         }
     }
 
-    protected async UniTask ProcessProductionQueue(ReactiveProperty<int> productionQueue, ReactiveProperty<int> inputResource, int costPerOrder)
+    protected void StartProductionTween()
     {
-        while (productionQueue.Value > 0)
+        float targetY = _initialY * 1.1f;
+        if (productionTween is null)
         {
-            if (inputResource.Value < costPerOrder)
-                break;
+            productionTween = transform.DOScaleY(targetY, ProductionTime * 0.4f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).Pause();
+        }
+        productionTween.Restart();
+    }
 
-            inputResource.Value -= costPerOrder;
+    protected void PauseProductionTween()
+    {
+        productionTween.Pause();
+    }
 
+    protected async UniTask ProcessProductionQueue()
+    {
+        while (ProductionQueue.Value > 0)
+        {
             float timer = 0f;
             while (timer < ProductionTime)
             {
                 ProductionProgress.Value = timer / ProductionTime;
-                await UniTask.Yield();
+                await UniTask.DelayFrame(1);
                 timer += Time.deltaTime;
             }
             ProductionProgress.Value = 0f;
-            InternalStorage.Value++;
-            productionQueue.Value--;
+            InternalStorage.Value += OutputResourceAmount;
+
+            if (ProductionQueue.Value == 0) return;
+            ProductionQueue.Value--;
         }
     }
 }
