@@ -238,7 +238,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5530436064798717753, guid: 55e3a84d39b224a5db2876ac574da39c, type: 3}
       propertyPath: _productionTime
-      value: 2
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 5530436064798717753, guid: 55e3a84d39b224a5db2876ac574da39c, type: 3}
       propertyPath: wheatCostPerOrder
@@ -2045,7 +2045,7 @@ MonoBehaviour:
   _inputResourceType: 1
   _inputCostPerOrder: 1
   _maxProductionQueue: 10
-  _productionTime: 2
+  _productionTime: 90
   _outputResource: 1
   _neededSprite: {fileID: 21300000, guid: 4e5d546e8ce7e41029c6e5feb3608f9c, type: 3}
   _mySprite: {fileID: 21300000, guid: 11d51e1b08e7d4a5d9e8935346113980, type: 3}
@@ -3555,9 +3555,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2c0c8a87622b5545b4b272f55c39193, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _productionTime: 2
+  _productionTime: 20
   _outputResource: 1
-  _capacity: 10
+  _capacity: 5
   _mySprite: {fileID: 21300000, guid: be5df5669c8834b66a502e016ef957ff, type: 3}
   _outputType: 0
 --- !u!1001 &2087897952
@@ -3649,7 +3649,7 @@ MonoBehaviour:
   _inputResourceType: 1
   _inputCostPerOrder: 2
   _maxProductionQueue: 20
-  _productionTime: 2
+  _productionTime: 60
   _outputResource: 1
   _neededSprite: {fileID: 21300000, guid: 4e5d546e8ce7e41029c6e5feb3608f9c, type: 3}
   _mySprite: {fileID: 21300000, guid: 11d51e1b08e7d4a5d9e8935346113980, type: 3}

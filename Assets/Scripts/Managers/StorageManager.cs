@@ -34,12 +34,12 @@ public static class StorageManager
 
     public static int GetResourceCount(ResourceType type)
     {
-        return resourceStorage.ContainsKey(type) ? resourceStorage[type].Value : 0;
+        return resourceStorage[type].Value;
     }
 
     public static ReactiveProperty<int> GetResourceProperty(ResourceType type)
     {
-        return resourceStorage.ContainsKey(type) ? resourceStorage[type] : new ReactiveProperty<int>(0);
+        return resourceStorage[type];
     }
 
     public static async void Save()
@@ -48,6 +48,7 @@ public static class StorageManager
         {
             PlayerPrefs.SetInt(resource.Key.ToString(), resource.Value.Value);
         }
+
         PlayerPrefs.Save();
         await UniTask.Delay(1);
     }
@@ -58,6 +59,7 @@ public static class StorageManager
         {
             resourceStorage[type].Value = PlayerPrefs.GetInt(type.ToString(), 0);
         }
+
         await UniTask.Delay(1);
     }
 }

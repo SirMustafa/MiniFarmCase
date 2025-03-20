@@ -20,6 +20,7 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
 
     public bool IsPanelOpened { get; set; }
     protected Tween productionTween;
+    private float tweenDuration = 1f;
     private float _initialY;
 
     protected abstract void ProduceResources();
@@ -30,7 +31,10 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     {
         _initialY = transform.localScale.y;
     }
-
+    private void Start()
+    {
+        GameManager.GameManagerInstance.AddBuildingToList(this);
+    }
     public virtual void OnClick()
     {
         if (!IsPanelOpened)
@@ -47,9 +51,10 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     protected void StartProductionTween()
     {
         float targetY = _initialY * 1.1f;
+        
         if (productionTween is null)
         {
-            productionTween = transform.DOScaleY(targetY, ProductionTime * 0.4f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).Pause();
+            productionTween = transform.DOScaleY(targetY, tweenDuration).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).Pause();
         }
         productionTween.Restart();
     }
@@ -73,8 +78,27 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
             ProductionProgress.Value = 0f;
             InternalStorage.Value += OutputResourceAmount;
 
-            if (ProductionQueue.Value == 0) return;
+            if (ProductionQueue.Value is 0) return;
             ProductionQueue.Value--;
         }
+    }
+    public void ApplyOfflineProduction(float offlineSeconds)
+    {
+        float productionTime = ProductionTime;
+
+        while (offlineSeconds >= productionTime && ProductionQueue.Value > 0)
+        {
+            if (InternalStorage.Value + OutputResourceAmount >= ProductionQueueCapacity)
+            {
+                InternalStorage.Value = ProductionQueueCapacity;
+                ProductionProgress.Value = 0f;
+                ProductionQueue.Value = 0;
+                return;
+            }
+            offlineSeconds -= productionTime;
+            InternalStorage.Value += OutputResourceAmount;
+            ProductionQueue.Value--;
+        }
+        ProductionProgress.Value = offlineSeconds / productionTime;
     }
 }
