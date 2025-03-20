@@ -16,7 +16,7 @@ public class FlourFactory : ResourceRequiringBuilding
     public override int OutputResourceAmount => _outputResource;
     public override StorageManager.ResourceType OutputResourceType => _outputType;
     public override Sprite NeededResourceSprite => _neededSprite;
-    public override Sprite ProductionSprite => _mySprite;
+    public override Sprite outputResourcesSprite => _mySprite;
     private void Start()
     {
         _mill.DORotate(new Vector3(0, 0, -360), 4f, RotateMode.LocalAxisAdd).SetEase(Ease.Linear).SetLoops(-1, LoopType.Restart);

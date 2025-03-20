@@ -10,16 +10,20 @@ public class InputManager : MonoBehaviour
     [SerializeField] private LayerMask interactableLayer;
     [SerializeField] private Camera mainCam;
     private float _raycastDistance = 100f;
-
-    public async void OnLeftMouseBtn(InputAction.CallbackContext context)
+    Vector2 inputValue;
+    public void OnClick(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
-        await UniTask.Yield(PlayerLoopTiming.Update);
+        inputValue = context.ReadValue<Vector2>();
+        _= OnPointerClick(inputValue);
+    }
+    public async UniTaskVoid OnPointerClick(Vector2 pointValue)
+    {
+        await UniTask.NextFrame();
+        if (EventSystem.current.IsPointerOverGameObject()) return;
 
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-
-        Vector2 mousePosition = Mouse.current.position.ReadValue();
-        Ray ray = mainCam.ScreenPointToRay(mousePosition);
+        Vector2 pointerPosition = pointValue;
+        Ray ray = mainCam.ScreenPointToRay(pointerPosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit, _raycastDistance, interactableLayer))
         {

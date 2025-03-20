@@ -20,11 +20,10 @@ public class UiManager : MonoBehaviour
     [Header("SliderPanel")]
     [SerializeField] private TextMeshProUGUI productionAmountTxt;
     [SerializeField] private TextMeshProUGUI producingInfoTxt;
-    [SerializeField] private Slider productionSlider;
-    [SerializeField] private Image currentImg;
     [SerializeField] private TextMeshProUGUI currentQueueTxt;
     [SerializeField] private TextMeshProUGUI maxQueueTxt;
-    [SerializeField] private TextMeshProUGUI slideTxt;
+    [SerializeField] private Slider productionSlider;
+    [SerializeField] private Image buildTypeImg;
 
     [Header("OrderBtn")]
     [SerializeField] private TextMeshProUGUI increaseBtnCount;
@@ -70,16 +69,14 @@ public class UiManager : MonoBehaviour
         {
             maxQueueTxt.gameObject.SetActive(true);
             currentQueueTxt.gameObject.SetActive(true);
-            slideTxt.gameObject.SetActive(true);
         }
         else
         {
             maxQueueTxt.gameObject.SetActive(false);
             currentQueueTxt.gameObject.SetActive(false);
-            slideTxt.gameObject.SetActive(false);
         }
 
-        currentImg.sprite = currentBuilding.ProductionSprite;
+        buildTypeImg.sprite = currentBuilding.outputResourcesSprite;
 
         if (currentBuilding is ResourceRequiringBuilding resourceBuilding)
         {

@@ -12,7 +12,7 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     public ReactiveProperty<int> ProductionQueue { get; protected set; } = new ReactiveProperty<int>(0);
 
     public abstract StorageManager.ResourceType OutputResourceType { get; }
-    public abstract Sprite ProductionSprite { get; }
+    public abstract Sprite outputResourcesSprite { get; }
     public abstract bool IsProducing { get; }
     public abstract float ProductionTime { get; }
     public abstract int OutputResourceAmount { get; }
@@ -21,15 +21,14 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     public bool IsPanelOpened { get; set; }
     protected Tween productionTween;
     private float tweenDuration = 1f;
-    private float _initialY;
+    private float _transformsY;
 
     protected abstract void ProduceResources();
     public abstract void CollectResources();
 
-
     private void Awake()
     {
-        _initialY = transform.localScale.y;
+        _transformsY = transform.localScale.y;
     }
     private void Start()
     {
@@ -50,7 +49,7 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
 
     protected void StartProductionTween()
     {
-        float targetY = _initialY * 1.1f;
+        float targetY = _transformsY * 1.1f;
         
         if (productionTween is null)
         {

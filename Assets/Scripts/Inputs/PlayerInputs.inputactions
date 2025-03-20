@@ -6,29 +6,63 @@
             "id": "14413afe-fb4a-4d62-bf14-1ff6411b53ad",
             "actions": [
                 {
-                    "name": "LMB",
-                    "type": "Button",
-                    "id": "a9f6ed79-2d5b-4711-be88-c70c98335eb9",
-                    "expectedControlType": "",
+                    "name": "Touch",
+                    "type": "Value",
+                    "id": "64d7e6dc-47b6-47f0-b4f1-ea8fd65db08f",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "",
-                    "id": "3bbd7a9c-d0f5-44b0-814b-32e9996b06df",
-                    "path": "<Mouse>/leftButton",
+                    "id": "d49c6fd2-d534-4fa7-9cc5-c3e90296ea16",
+                    "path": "<Touchscreen>/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "LMB",
+                    "groups": ";Mobile",
+                    "action": "Touch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "32c35832-6305-4064-b253-72964c3187ab",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Pc",
+                    "action": "Touch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
             ]
         }
     ],
-    "controlSchemes": []
+    "controlSchemes": [
+        {
+            "name": "Mobile",
+            "bindingGroup": "Mobile",
+            "devices": [
+                {
+                    "devicePath": "<Touchscreen>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "Pc",
+            "bindingGroup": "Pc",
+            "devices": [
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
 }

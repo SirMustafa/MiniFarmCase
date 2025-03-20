@@ -7,7 +7,7 @@ public abstract class ResourceFreeBuilding : BuildingsBase
 {
     public override bool IsProducing => _isProducing;
     public override abstract int ProductionQueueCapacity { get; }
-    public override abstract Sprite ProductionSprite { get; }
+    public override abstract Sprite outputResourcesSprite { get; }
 
     public abstract override float ProductionTime { get; }
     public abstract override int OutputResourceAmount { get; }

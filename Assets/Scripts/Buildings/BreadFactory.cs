@@ -15,5 +15,5 @@ public class BreadFactory : ResourceRequiringBuilding
     public override int OutputResourceAmount => _outputResource;
     public override StorageManager.ResourceType OutputResourceType => _outputType;
     public override Sprite NeededResourceSprite => _neededSprite;
-    public override Sprite ProductionSprite => _mySprite;
+    public override Sprite outputResourcesSprite => _mySprite;
 }
