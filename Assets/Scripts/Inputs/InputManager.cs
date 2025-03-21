@@ -11,15 +11,18 @@ public class InputManager : MonoBehaviour
     [SerializeField] private Camera mainCam;
     private float _raycastDistance = 100f;
     private Vector2 inputValue;
+
     public void OnClick(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
         inputValue = context.ReadValue<Vector2>();
         _= OnPointerClick(inputValue);
     }
+
     private async UniTaskVoid OnPointerClick(Vector2 pointValue)
     {
         await UniTask.NextFrame();
+
         if (EventSystem.current.IsPointerOverGameObject()) return;
 
         Vector2 pointerPosition = pointValue;
@@ -27,7 +30,7 @@ public class InputManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, _raycastDistance, interactableLayer))
         {
-            hit.collider.gameObject.GetComponent<IClickable>()?.OnClick();
+            hit.collider.gameObject.GetComponent<IClickable>().OnClick();
         }
         else
         {

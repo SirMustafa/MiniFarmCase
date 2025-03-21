@@ -16,4 +16,9 @@ public class BreadFactory : ResourceRequiringBuilding
     public override StorageManager.ResourceType OutputResourceType => _outputType;
     public override Sprite NeededResourceSprite => _neededSprite;
     public override Sprite outputResourcesSprite => _mySprite;
+
+    private void Start()
+    {
+        GameManager.GameManagerInstance.AddBuildingToList(this);
+    }
 }

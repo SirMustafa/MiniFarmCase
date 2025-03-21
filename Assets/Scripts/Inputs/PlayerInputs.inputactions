@@ -13,15 +13,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "Test",
-                    "type": "Button",
-                    "id": "23ad4ece-1f87-4e1d-b1d0-2668f64b3949",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -31,7 +22,7 @@
                     "path": "<Touchscreen>/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Mobile",
+                    "groups": ";Mobile;Pc",
                     "action": "Touch",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -42,19 +33,8 @@
                     "path": "<Mouse>/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Pc",
-                    "action": "Touch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "2f73237a-a306-4928-a01f-4da5225a5615",
-                    "path": "<Keyboard>/o",
-                    "interactions": "",
-                    "processors": "",
                     "groups": ";Pc;Mobile",
-                    "action": "Test",
+                    "action": "Touch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -72,7 +52,7 @@
                     "isOR": false
                 },
                 {
-                    "devicePath": "<Keyboard>",
+                    "devicePath": "<Mouse>",
                     "isOptional": false,
                     "isOR": false
                 }
@@ -88,7 +68,7 @@
                     "isOR": false
                 },
                 {
-                    "devicePath": "<Keyboard>",
+                    "devicePath": "<Touchscreen>",
                     "isOptional": false,
                     "isOR": false
                 }

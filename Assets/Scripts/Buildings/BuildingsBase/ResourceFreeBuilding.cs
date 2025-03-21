@@ -12,10 +12,16 @@ public abstract class ResourceFreeBuilding : BuildingsBase
     public abstract override float ProductionTime { get; }
     public abstract override int OutputResourceAmount { get; }
     public abstract override StorageManager.ResourceType OutputResourceType { get; }
-    
+
     private bool _isProducing = false;
 
-    protected override async UniTask ProduceResources()
+    private void Start()
+    {
+        GameManager.GameManagerInstance.AddBuildingToList(this);
+        ProduceResources().Forget();
+    }
+
+    public override async UniTask ProduceResources()
     {
         if (_isProducing) return;
         _isProducing = true;
@@ -30,7 +36,10 @@ public abstract class ResourceFreeBuilding : BuildingsBase
                 ProductionProgress.Value = timer / ProductionTime;
                 await UniTask.Yield();
                 timer += Time.deltaTime;
+
+                if (isStorageFull) return;
             }
+
             ProductionProgress.Value = 0f;
             InternalStorage.Value += OutputResourceAmount;
         }
@@ -38,18 +47,31 @@ public abstract class ResourceFreeBuilding : BuildingsBase
         PauseProductionTween();
         _isProducing = false;
     }
+    public override void OfflineProduction(float offlineSeconds)
+    {
+        float productionTime = ProductionTime;
+
+        while (offlineSeconds >= productionTime && InternalStorage.Value < ProductionQueueCapacity)
+        {
+            if (InternalStorage.Value + OutputResourceAmount >= ProductionQueueCapacity)
+            {
+                InternalStorage.Value = ProductionQueueCapacity;
+                ProductionProgress.Value = 0f;
+                isStorageFull = true;
+                return;
+            }
+
+            offlineSeconds -= productionTime;
+            InternalStorage.Value += OutputResourceAmount;
+        }
+    }
 
     public override void CollectResources()
     {
         StorageManager.AddResource(OutputResourceType, InternalStorage.Value);
         InternalStorage.Value = 0;
-
-        if (!IsProducing)
-            ProduceResources().Forget();
-    }
-
-    private void Start()
-    {
-        ProduceResources().Forget();
+        isStorageFull = false;
+        _isProducing = false;
+        if (!IsProducing) ProduceResources().Forget();
     }
 }

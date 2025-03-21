@@ -23,23 +23,22 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
 
     public override void CollectResources()
     {
+        isStorageFull = false;
         StorageManager.AddResource(OutputResourceType, InternalStorage.Value);
         InternalStorage.Value = 0;
+        isStorageFull = false;
     }
 
     public void EnqueueProductionOrder()
     {
-        if (ProductionQueue.Value >= ProductionQueueCapacity)
-            return;
+        if (ProductionQueue.Value >= ProductionQueueCapacity) return;
 
-        if (StorageManager.GetResourceCount(_inputResourceType) < _inputCostPerOrder)
-            return;
+        if (StorageManager.GetResourceCount(_inputResourceType) < _inputCostPerOrder) return;
 
         StorageManager.RemoveResource(_inputResourceType, _inputCostPerOrder);
         ProductionQueue.Value++;
 
-        if (!IsProducing)
-            ProduceResources().Forget();
+        if (!IsProducing) ProduceResources().Forget();
     }
 
     public void DequeueProductionOrder()
@@ -51,7 +50,7 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
         }     
     }
 
-    protected override async UniTask ProduceResources()
+    public override async UniTask ProduceResources()
     {
         if (IsProducing) return;
 

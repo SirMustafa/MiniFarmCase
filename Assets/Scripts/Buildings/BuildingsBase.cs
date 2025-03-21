@@ -17,23 +17,21 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     public abstract float ProductionTime { get; }
     public abstract int OutputResourceAmount { get; }
     public abstract int ProductionQueueCapacity { get; }
+    protected bool isStorageFull = false;
 
     public bool IsPanelOpened { get; set; }
     protected Tween productionTween;
     private float tweenDuration = 1f;
     private float _transformsY;
 
-    protected abstract UniTask ProduceResources();
+    public abstract UniTask ProduceResources();
     public abstract void CollectResources();
 
     private void Awake()
     {
         _transformsY = transform.localScale.y;
     }
-    private void Start()
-    {
-        GameManager.GameManagerInstance.AddBuildingToList(this);
-    }
+
     public virtual void OnClick()
     {
         if (!IsPanelOpened)
@@ -70,10 +68,16 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
             float timer = ProductionProgress.Value * ProductionTime;
             while (timer < ProductionTime)
             {
+                if (isStorageFull)
+                {
+                    return;
+                }
+
                 ProductionProgress.Value = timer / ProductionTime;
                 await UniTask.DelayFrame(1);
                 timer += Time.deltaTime;
             }
+
             ProductionProgress.Value = 0f;
             InternalStorage.Value += OutputResourceAmount;
 
@@ -81,27 +85,24 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
             ProductionQueue.Value--;
         }
     }
-    public void OfflineProduction(float offlineSeconds)
+    public virtual void OfflineProduction(float offlineSeconds)
     {
         float productionTime = ProductionTime;
 
-        while (offlineSeconds >= productionTime && ProductionQueue.Value > 0)
+        while (offlineSeconds >= productionTime && ProductionQueue.Value > 0 && !isStorageFull)
         {
             if (InternalStorage.Value + OutputResourceAmount >= ProductionQueueCapacity)
             {
                 InternalStorage.Value = ProductionQueueCapacity;
                 ProductionQueue.Value = 0;
+                isStorageFull = true;
+                ProductionProgress.Value = 0f;
                 return;
             }
 
             offlineSeconds -= productionTime;
             InternalStorage.Value += OutputResourceAmount;
             ProductionQueue.Value--;
-        }
-
-        if (ProductionQueue.Value > 0)
-        {
-            ProductionProgress.Value = offlineSeconds / productionTime;
         }
     }
 }

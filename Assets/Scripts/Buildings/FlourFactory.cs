@@ -19,6 +19,7 @@ public class FlourFactory : ResourceRequiringBuilding
     public override Sprite outputResourcesSprite => _mySprite;
     private void Start()
     {
+        GameManager.GameManagerInstance.AddBuildingToList(this);
         _mill.DORotate(new Vector3(0, 0, -360), 4f, RotateMode.LocalAxisAdd).SetEase(Ease.Linear).SetLoops(-1, LoopType.Restart);
     }
 }
