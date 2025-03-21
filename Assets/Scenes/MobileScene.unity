@@ -579,7 +579,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5530436064798717753, guid: 55e3a84d39b224a5db2876ac574da39c, type: 3}
       propertyPath: _productionTime
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5530436064798717753, guid: 55e3a84d39b224a5db2876ac574da39c, type: 3}
       propertyPath: wheatCostPerOrder

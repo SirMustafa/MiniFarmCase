@@ -67,13 +67,12 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     {
         while (ProductionQueue.Value > 0)
         {
-            float timer = 0f;
+            float timer = ProductionProgress.Value * ProductionTime;
             while (timer < ProductionTime)
             {
                 ProductionProgress.Value = timer / ProductionTime;
                 await UniTask.DelayFrame(1);
                 timer += Time.deltaTime;
-                //Debug.Log(ProductionProgress.Value);
             }
             ProductionProgress.Value = 0f;
             InternalStorage.Value += OutputResourceAmount;
