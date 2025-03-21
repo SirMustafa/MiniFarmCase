@@ -15,7 +15,7 @@ public abstract class ResourceFreeBuilding : BuildingsBase
     
     private bool _isProducing = false;
 
-    protected override async void ProduceResources()
+    protected override async UniTask ProduceResources()
     {
         if (_isProducing) return;
         _isProducing = true;
@@ -45,11 +45,11 @@ public abstract class ResourceFreeBuilding : BuildingsBase
         InternalStorage.Value = 0;
 
         if (!IsProducing)
-            ProduceResources();
+            ProduceResources().Forget();
     }
 
     private void Start()
     {
-        ProduceResources();
+        ProduceResources().Forget();
     }
 }

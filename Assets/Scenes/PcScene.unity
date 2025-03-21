@@ -1116,7 +1116,23 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 64d7e6dc-47b6-47f0-b4f1-ea8fd65db08f
     m_ActionName: General/Touch[/Device Simulator Touchscreen/position,/Mouse/position]
-  m_NeverAutoSwitchControlSchemes: 0
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2045833879}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: testt
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 23ad4ece-1f87-4e1d-b1d0-2668f64b3949
+    m_ActionName: General/Test[/Keyboard/o]
+  m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Pc
   m_DefaultActionMap: General
   m_SplitScreenIndex: -1
@@ -3654,7 +3670,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2c0c8a87622b5545b4b272f55c39193, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _productionTime: 20
+  _productionTime: 2
   _outputResource: 1
   _capacity: 5
   _mySprite: {fileID: 21300000, guid: be5df5669c8834b66a502e016ef957ff, type: 3}

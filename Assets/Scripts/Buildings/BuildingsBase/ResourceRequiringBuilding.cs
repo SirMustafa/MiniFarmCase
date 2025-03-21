@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,7 +39,7 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
         ProductionQueue.Value++;
 
         if (!IsProducing)
-            ProduceResources();
+            ProduceResources().Forget();
     }
 
     public void DequeueProductionOrder()
@@ -50,7 +51,7 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
         }     
     }
 
-    protected override async void ProduceResources()
+    protected override async UniTask ProduceResources()
     {
         if (IsProducing) return;
 

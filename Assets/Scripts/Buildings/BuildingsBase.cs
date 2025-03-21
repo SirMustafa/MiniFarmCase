@@ -23,7 +23,7 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     private float tweenDuration = 1f;
     private float _transformsY;
 
-    protected abstract void ProduceResources();
+    protected abstract UniTask ProduceResources();
     public abstract void CollectResources();
 
     private void Awake()
@@ -73,6 +73,7 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
                 ProductionProgress.Value = timer / ProductionTime;
                 await UniTask.DelayFrame(1);
                 timer += Time.deltaTime;
+                //Debug.Log(ProductionProgress.Value);
             }
             ProductionProgress.Value = 0f;
             InternalStorage.Value += OutputResourceAmount;
@@ -81,7 +82,7 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
             ProductionQueue.Value--;
         }
     }
-    public void ApplyOfflineProduction(float offlineSeconds)
+    public void OfflineProduction(float offlineSeconds)
     {
         float productionTime = ProductionTime;
 
@@ -90,14 +91,18 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
             if (InternalStorage.Value + OutputResourceAmount >= ProductionQueueCapacity)
             {
                 InternalStorage.Value = ProductionQueueCapacity;
-                ProductionProgress.Value = 0f;
                 ProductionQueue.Value = 0;
                 return;
             }
+
             offlineSeconds -= productionTime;
             InternalStorage.Value += OutputResourceAmount;
             ProductionQueue.Value--;
         }
-        ProductionProgress.Value = offlineSeconds / productionTime;
+
+        if (ProductionQueue.Value > 0)
+        {
+            ProductionProgress.Value = offlineSeconds / productionTime;
+        }
     }
 }

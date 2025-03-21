@@ -36,7 +36,7 @@ public class UiManager : MonoBehaviour
 
     private void Awake()
     {
-        if (UiManagerInstance == null)
+        if (UiManagerInstance is null)
             UiManagerInstance = this;
         else
             Destroy(gameObject);
@@ -140,7 +140,7 @@ public class UiManager : MonoBehaviour
         optionsPanel.gameObject.SetActive(false);
         panelSubscriptions.Dispose();
 
-        if (currentBuilding != null)
+        if (currentBuilding is not null)
         {
             currentBuilding.IsPanelOpened = false;
             currentBuilding = null;

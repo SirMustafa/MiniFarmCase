@@ -10,14 +10,14 @@ public class InputManager : MonoBehaviour
     [SerializeField] private LayerMask interactableLayer;
     [SerializeField] private Camera mainCam;
     private float _raycastDistance = 100f;
-    Vector2 inputValue;
+    private Vector2 inputValue;
     public void OnClick(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
         inputValue = context.ReadValue<Vector2>();
         _= OnPointerClick(inputValue);
     }
-    public async UniTaskVoid OnPointerClick(Vector2 pointValue)
+    private async UniTaskVoid OnPointerClick(Vector2 pointValue)
     {
         await UniTask.NextFrame();
         if (EventSystem.current.IsPointerOverGameObject()) return;
