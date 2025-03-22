@@ -51,7 +51,8 @@ public class UiManager : MonoBehaviour
 
     public void ShowBuildingPanel(BuildingsBase building)
     {
-        if (currentBuilding is not null && currentBuilding != building) currentBuilding.IsPanelOpened = false;
+        if (currentBuilding is not null && currentBuilding != building)
+            currentBuilding.IsPanelOpened = false;
 
         panelSubscriptions.Dispose();
         panelSubscriptions = new CompositeDisposable();
@@ -65,21 +66,11 @@ public class UiManager : MonoBehaviour
             .Subscribe(x => UpdateBuildingPanelUI(x.progress, x.storage, currentBuilding))
             .AddTo(panelSubscriptions);
 
-        if (currentBuilding is ResourceRequiringBuilding)
+        if (currentBuilding is ResourceRequiringBuilding resourceBuilding)
         {
             maxQueueTxt.gameObject.SetActive(true);
             currentQueueTxt.gameObject.SetActive(true);
-        }
-        else
-        {
-            maxQueueTxt.gameObject.SetActive(false);
-            currentQueueTxt.gameObject.SetActive(false);
-        }
 
-        buildTypeImg.sprite = currentBuilding.OutputResourcesSprite;
-
-        if (currentBuilding is ResourceRequiringBuilding resourceBuilding)
-        {
             increaseBtn.gameObject.SetActive(true);
             decreaseBtn.gameObject.SetActive(true);
             increaseBtnImg.gameObject.SetActive(true);
@@ -92,9 +83,21 @@ public class UiManager : MonoBehaviour
             currentBuilding.ProductionQueue
                 .Subscribe(queue => currentQueueTxt.text = queue.ToString())
                 .AddTo(panelSubscriptions);
+
+            Observable.CombineLatest(
+                currentBuilding.ProductionQueue,
+                StorageManager.GetResourceProperty(resourceBuilding.InputResourceType),
+                (queue, inputResourceCount) => queue < resourceBuilding.ProductionQueueCapacity
+                                                && inputResourceCount >= resourceBuilding.InputCostPerOrder
+            )
+            .Subscribe(canIncrease =>{increaseBtn.gameObject.SetActive(canIncrease);}).AddTo(panelSubscriptions);
+
+            currentBuilding.ProductionQueue.Subscribe(queue =>{decreaseBtn.gameObject.SetActive(queue > 0);}).AddTo(panelSubscriptions);
         }
         else
         {
+            maxQueueTxt.gameObject.SetActive(false);
+            currentQueueTxt.gameObject.SetActive(false);
             increaseBtn.gameObject.SetActive(false);
             decreaseBtn.gameObject.SetActive(false);
             increaseBtnImg.gameObject.SetActive(false);

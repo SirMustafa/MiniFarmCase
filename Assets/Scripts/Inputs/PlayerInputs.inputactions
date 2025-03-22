@@ -22,7 +22,7 @@
                     "path": "<Touchscreen>/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Mobile",
+                    "groups": ";Mobile;Pc",
                     "action": "Touch",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -68,7 +68,7 @@
                     "isOR": false
                 },
                 {
-                    "devicePath": "<Touchscreen>",
+                    "devicePath": "<Keyboard>",
                     "isOptional": false,
                     "isOR": false
                 }

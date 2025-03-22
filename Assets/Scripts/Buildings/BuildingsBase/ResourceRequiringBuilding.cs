@@ -1,6 +1,8 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public abstract class ResourceRequiringBuilding : BuildingsBase
@@ -22,6 +24,7 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
     public int InputCostPerOrder => _inputCostPerOrder;
 
     private bool _isProducing = false;
+    private CancellationTokenSource cancelToken = new CancellationTokenSource();
 
     public override void CollectResources()
     {
@@ -31,8 +34,8 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
 
     public void EnqueueProductionOrder()
     {
-        if (ProductionQueue.Value >= ProductionQueueCapacity) return;
-        if (StorageManager.GetResourceCount(_inputResourceType) < _inputCostPerOrder) return;
+        if (ProductionQueue.Value >= ProductionQueueCapacity 
+            && StorageManager.GetResourceCount(_inputResourceType) < _inputCostPerOrder) return;
 
         StorageManager.RemoveResource(_inputResourceType, _inputCostPerOrder);
         ProductionQueue.Value++;
@@ -49,6 +52,12 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
         {
             ProductionQueue.Value--;
             StorageManager.AddResource(_inputResourceType, _inputCostPerOrder);
+
+            if (ProductionQueue.Value is 0)
+            {
+                ProductionProgress.Value = 0f;
+                cancelToken.Cancel();
+            }
         }
     }
 
@@ -59,34 +68,55 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
 
         StartProductionTween();
 
-        await ProcessProductionQueue();
+        try
+        {
+            await ProcessProductionQueue(cancelToken.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("Uretim iptal");
+        }
 
-        PauseProductionTween();
-        _isProducing = false;
+        finally
+        {
+            PauseProductionTween();
+            _isProducing = false;
+
+            if (cancelToken.IsCancellationRequested)
+            {
+                cancelToken.Dispose();
+                cancelToken = new CancellationTokenSource();
+            }
+        }
     }
 
-    private async UniTask ProcessProductionQueue()
+    private async UniTask ProcessProductionQueue(CancellationToken token)
     {
         while (ProductionQueue.Value > 0)
         {
-            float timer = ProductionProgress.Value * ProductionTime;
-
-            while (timer < ProductionTime)
-            {
-                if (IsStorageFull)
-                {
-                    await UniTask.WaitUntil(() => !IsStorageFull);
-                }
-
-                ProductionProgress.Value = timer / ProductionTime;
-                await UniTask.Yield();
-                timer += Time.deltaTime;
-            }
-
-            ProductionProgress.Value = 0f;
-            InternalStorage.Value += OutputResourceAmount;
-            ProductionQueue.Value--;
+            await RunProductionCycle(token);
         }
+    }
+
+    private async UniTask RunProductionCycle(CancellationToken token)
+    {
+        float timer = ProductionProgress.Value * ProductionTime;
+
+        while (timer < ProductionTime)
+        {
+            token.ThrowIfCancellationRequested();
+            if (IsStorageFull)
+            {
+                await UniTask.WaitUntil(() => !IsStorageFull, cancellationToken: token);
+            }
+            ProductionProgress.Value = timer / ProductionTime;
+            await UniTask.Yield();
+            timer += Time.deltaTime;
+        }
+
+        ProductionProgress.Value = 0f;
+        InternalStorage.Value += OutputResourceAmount;
+        ProductionQueue.Value--;
     }
 
     public override void OfflineProduction(float offlineSeconds)

@@ -75,7 +75,6 @@ public abstract class ResourceFreeBuilding : BuildingsBase
         StorageManager.AddResource(OutputResourceType, InternalStorage.Value);
         InternalStorage.Value = 0;
 
-        _isProducing = false;
         if (!IsProducing)
         {
             ProduceResources().Forget();
