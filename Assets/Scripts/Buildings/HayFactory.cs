@@ -14,6 +14,6 @@ public class HayFactory : ResourceFreeBuilding
     public override float ProductionTime => _productionTime;
     public override int OutputResourceAmount => _outputResource;
     public override StorageManager.ResourceType OutputResourceType => _outputType;
-    public override Sprite outputResourcesSprite => _mySprite;
+    public override Sprite OutputResourcesSprite => _mySprite;
     public override int ProductionQueueCapacity => _capacity;
 }

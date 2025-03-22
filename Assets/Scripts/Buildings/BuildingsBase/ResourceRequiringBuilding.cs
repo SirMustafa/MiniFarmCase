@@ -12,33 +12,35 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
 
     public StorageManager.ResourceType InputResourceType => _inputResourceType;
     public override bool IsProducing => _isProducing;
-    public override int ProductionQueueCapacity => _maxProductionQueue;   
+    public override int ProductionQueueCapacity => _maxProductionQueue;
+
     public abstract Sprite NeededResourceSprite { get; }
     public abstract override float ProductionTime { get; }
     public abstract override int OutputResourceAmount { get; }
     public abstract override StorageManager.ResourceType OutputResourceType { get; }
 
     public int InputCostPerOrder => _inputCostPerOrder;
+
     private bool _isProducing = false;
 
     public override void CollectResources()
     {
-        isStorageFull = false;
         StorageManager.AddResource(OutputResourceType, InternalStorage.Value);
         InternalStorage.Value = 0;
-        isStorageFull = false;
     }
 
     public void EnqueueProductionOrder()
     {
         if (ProductionQueue.Value >= ProductionQueueCapacity) return;
-
         if (StorageManager.GetResourceCount(_inputResourceType) < _inputCostPerOrder) return;
 
         StorageManager.RemoveResource(_inputResourceType, _inputCostPerOrder);
         ProductionQueue.Value++;
 
-        if (!IsProducing) ProduceResources().Forget();
+        if (!IsProducing)
+        {
+            ProduceResources().Forget();
+        }
     }
 
     public void DequeueProductionOrder()
@@ -47,13 +49,12 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
         {
             ProductionQueue.Value--;
             StorageManager.AddResource(_inputResourceType, _inputCostPerOrder);
-        }     
+        }
     }
 
     public override async UniTask ProduceResources()
     {
-        if (IsProducing) return;
-
+        if (_isProducing) return;
         _isProducing = true;
 
         StartProductionTween();
@@ -62,5 +63,49 @@ public abstract class ResourceRequiringBuilding : BuildingsBase
 
         PauseProductionTween();
         _isProducing = false;
+    }
+
+    private async UniTask ProcessProductionQueue()
+    {
+        while (ProductionQueue.Value > 0)
+        {
+            float timer = ProductionProgress.Value * ProductionTime;
+
+            while (timer < ProductionTime)
+            {
+                if (IsStorageFull)
+                {
+                    await UniTask.WaitUntil(() => !IsStorageFull);
+                }
+
+                ProductionProgress.Value = timer / ProductionTime;
+                await UniTask.Yield();
+                timer += Time.deltaTime;
+            }
+
+            ProductionProgress.Value = 0f;
+            InternalStorage.Value += OutputResourceAmount;
+            ProductionQueue.Value--;
+        }
+    }
+
+    public override void OfflineProduction(float offlineSeconds)
+    {
+        float productionTime = ProductionTime;
+        int maxPossibleCycles = Mathf.FloorToInt(offlineSeconds / productionTime);
+        int cyclesToProduce = Mathf.Min(maxPossibleCycles, ProductionQueue.Value);
+
+        for (int i = 0; i < cyclesToProduce; i++)
+        {
+            if (InternalStorage.Value + OutputResourceAmount >= ProductionQueueCapacity)
+            {
+                InternalStorage.Value = ProductionQueueCapacity;
+                ProductionProgress.Value = 0f;
+                return;
+            }
+
+            InternalStorage.Value += OutputResourceAmount;
+            ProductionQueue.Value--;
+        }
     }
 }

@@ -7,8 +7,7 @@ public abstract class ResourceFreeBuilding : BuildingsBase
 {
     public override bool IsProducing => _isProducing;
     public override abstract int ProductionQueueCapacity { get; }
-    public override abstract Sprite outputResourcesSprite { get; }
-
+    public override abstract Sprite OutputResourcesSprite { get; }
     public abstract override float ProductionTime { get; }
     public abstract override int OutputResourceAmount { get; }
     public abstract override StorageManager.ResourceType OutputResourceType { get; }
@@ -28,7 +27,7 @@ public abstract class ResourceFreeBuilding : BuildingsBase
 
         StartProductionTween();
 
-        while (InternalStorage.Value < ProductionQueueCapacity)
+        while (!IsStorageFull)
         {
             float timer = 0f;
             while (timer < ProductionTime)
@@ -37,7 +36,12 @@ public abstract class ResourceFreeBuilding : BuildingsBase
                 await UniTask.Yield();
                 timer += Time.deltaTime;
 
-                if (isStorageFull) return;
+                if (IsStorageFull)
+                {
+                    PauseProductionTween();
+                    _isProducing = false;
+                    return;
+                }
             }
 
             ProductionProgress.Value = 0f;
@@ -47,21 +51,21 @@ public abstract class ResourceFreeBuilding : BuildingsBase
         PauseProductionTween();
         _isProducing = false;
     }
+
     public override void OfflineProduction(float offlineSeconds)
     {
         float productionTime = ProductionTime;
+        int maxPossibleCycles = Mathf.FloorToInt(offlineSeconds / productionTime);
 
-        while (offlineSeconds >= productionTime && InternalStorage.Value < ProductionQueueCapacity)
+        for (int i = 0; i < maxPossibleCycles && !IsStorageFull; i++)
         {
             if (InternalStorage.Value + OutputResourceAmount >= ProductionQueueCapacity)
             {
                 InternalStorage.Value = ProductionQueueCapacity;
                 ProductionProgress.Value = 0f;
-                isStorageFull = true;
                 return;
             }
 
-            offlineSeconds -= productionTime;
             InternalStorage.Value += OutputResourceAmount;
         }
     }
@@ -70,8 +74,11 @@ public abstract class ResourceFreeBuilding : BuildingsBase
     {
         StorageManager.AddResource(OutputResourceType, InternalStorage.Value);
         InternalStorage.Value = 0;
-        isStorageFull = false;
+
         _isProducing = false;
-        if (!IsProducing) ProduceResources().Forget();
+        if (!IsProducing)
+        {
+            ProduceResources().Forget();
+        }
     }
 }

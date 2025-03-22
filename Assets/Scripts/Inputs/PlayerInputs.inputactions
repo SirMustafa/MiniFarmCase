@@ -22,7 +22,7 @@
                     "path": "<Touchscreen>/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Mobile;Pc",
+                    "groups": ";Mobile",
                     "action": "Touch",
                     "isComposite": false,
                     "isPartOfComposite": false

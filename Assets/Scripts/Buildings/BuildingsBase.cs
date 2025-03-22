@@ -12,24 +12,27 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     public ReactiveProperty<int> ProductionQueue { get; protected set; } = new ReactiveProperty<int>(0);
 
     public abstract StorageManager.ResourceType OutputResourceType { get; }
-    public abstract Sprite outputResourcesSprite { get; }
+    public abstract Sprite OutputResourcesSprite { get; }
     public abstract bool IsProducing { get; }
     public abstract float ProductionTime { get; }
     public abstract int OutputResourceAmount { get; }
     public abstract int ProductionQueueCapacity { get; }
-    protected bool isStorageFull = false;
+
+    protected virtual bool IsStorageFull => InternalStorage.Value >= ProductionQueueCapacity;
 
     public bool IsPanelOpened { get; set; }
+
     protected Tween productionTween;
-    private float tweenDuration = 1f;
-    private float _transformsY;
+    private float _tweenDuration = 1f;
+    private float _originalScaleY;
 
     public abstract UniTask ProduceResources();
     public abstract void CollectResources();
+    public abstract void OfflineProduction(float offlineSeconds);
 
-    private void Awake()
+    protected virtual void Awake()
     {
-        _transformsY = transform.localScale.y;
+        _originalScaleY = transform.localScale.y;
     }
 
     public virtual void OnClick()
@@ -47,62 +50,21 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
 
     protected void StartProductionTween()
     {
-        float targetY = _transformsY * 1.1f;
-        
+        float targetY = _originalScaleY * 1.1f;
+
         if (productionTween is null)
         {
-            productionTween = transform.DOScaleY(targetY, tweenDuration).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).Pause();
+            productionTween = transform.DOScaleY(targetY, _tweenDuration).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).Pause();
         }
+
         productionTween.Restart();
     }
 
     protected void PauseProductionTween()
     {
-        productionTween.Pause();
-    }
-
-    protected async UniTask ProcessProductionQueue()
-    {
-        while (ProductionQueue.Value > 0)
+        if (productionTween is not null)
         {
-            float timer = ProductionProgress.Value * ProductionTime;
-            while (timer < ProductionTime)
-            {
-                if (isStorageFull)
-                {
-                    return;
-                }
-
-                ProductionProgress.Value = timer / ProductionTime;
-                await UniTask.DelayFrame(1);
-                timer += Time.deltaTime;
-            }
-
-            ProductionProgress.Value = 0f;
-            InternalStorage.Value += OutputResourceAmount;
-
-            if (ProductionQueue.Value is 0) return;
-            ProductionQueue.Value--;
-        }
-    }
-    public virtual void OfflineProduction(float offlineSeconds)
-    {
-        float productionTime = ProductionTime;
-
-        while (offlineSeconds >= productionTime && ProductionQueue.Value > 0 && !isStorageFull)
-        {
-            if (InternalStorage.Value + OutputResourceAmount >= ProductionQueueCapacity)
-            {
-                InternalStorage.Value = ProductionQueueCapacity;
-                ProductionQueue.Value = 0;
-                isStorageFull = true;
-                ProductionProgress.Value = 0f;
-                return;
-            }
-
-            offlineSeconds -= productionTime;
-            InternalStorage.Value += OutputResourceAmount;
-            ProductionQueue.Value--;
+            productionTween.Pause();
         }
     }
 }

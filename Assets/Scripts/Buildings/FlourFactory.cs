@@ -16,7 +16,7 @@ public class FlourFactory : ResourceRequiringBuilding
     public override int OutputResourceAmount => _outputResource;
     public override StorageManager.ResourceType OutputResourceType => _outputType;
     public override Sprite NeededResourceSprite => _neededSprite;
-    public override Sprite outputResourcesSprite => _mySprite;
+    public override Sprite OutputResourcesSprite => _mySprite;
     private void Start()
     {
         GameManager.GameManagerInstance.AddBuildingToList(this);

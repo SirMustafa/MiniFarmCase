@@ -76,7 +76,7 @@ public class UiManager : MonoBehaviour
             currentQueueTxt.gameObject.SetActive(false);
         }
 
-        buildTypeImg.sprite = currentBuilding.outputResourcesSprite;
+        buildTypeImg.sprite = currentBuilding.OutputResourcesSprite;
 
         if (currentBuilding is ResourceRequiringBuilding resourceBuilding)
         {
