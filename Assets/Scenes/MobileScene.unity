@@ -1705,7 +1705,7 @@ GameObject:
   - component: {fileID: 733004155}
   - component: {fileID: 733004154}
   m_Layer: 5
-  m_Name: Indicator
+  m_Name: MinusOneTxt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2048,7 +2048,7 @@ GameObject:
   - component: {fileID: 834096681}
   - component: {fileID: 834096682}
   m_Layer: 5
-  m_Name: IncreaseAmount
+  m_Name: IncreaseAmountTxt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2838,7 +2838,7 @@ GameObject:
   - component: {fileID: 1135047419}
   - component: {fileID: 1135047418}
   m_Layer: 5
-  m_Name: DecreaseProduction
+  m_Name: DecreaseProductionBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3334,7 +3334,7 @@ GameObject:
   - component: {fileID: 1683475045}
   - component: {fileID: 1683475044}
   m_Layer: 5
-  m_Name: IncreaseProduction
+  m_Name: IncreaseProductionBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3468,7 +3468,7 @@ GameObject:
   - component: {fileID: 1693016327}
   - component: {fileID: 1693016326}
   m_Layer: 5
-  m_Name: PlusOne
+  m_Name: PlusOneTxt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

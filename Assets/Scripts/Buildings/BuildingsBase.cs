@@ -30,12 +30,12 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
     public abstract void CollectResources();
     public abstract void OfflineProduction(float offlineSeconds);
 
-    protected virtual void Awake()
+    private void Awake()
     {
         _originalScaleY = transform.localScale.y;
     }
 
-    public virtual void OnClick()
+    public void OnClick()
     {
         if (!IsPanelOpened)
         {
@@ -62,9 +62,6 @@ public abstract class BuildingsBase : MonoBehaviour, IClickable
 
     protected void PauseProductionTween()
     {
-        if (productionTween is not null)
-        {
-            productionTween.Pause();
-        }
+        productionTween.Pause();
     }
 }
