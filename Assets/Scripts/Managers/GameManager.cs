@@ -19,12 +19,12 @@ public class GameManager : MonoBehaviour
     {
         if (isPaused)
         {
+            focusLostTime = DateTime.UtcNow;
             StorageManager.Save();
         }
         else
         {
             float elapsedSeconds = (float)(DateTime.UtcNow - focusLostTime).TotalSeconds;
-
             foreach (BuildingsBase building in buildings)
             {
                 building.OfflineProduction(elapsedSeconds);
