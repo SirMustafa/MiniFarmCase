@@ -57,6 +57,8 @@ public class UiManager : MonoBehaviour
         panelSubscriptions.Dispose();
         panelSubscriptions = new CompositeDisposable();
 
+        buildTypeImg.sprite = building.OutputResourcesSprite;
+
         optionsPanel.gameObject.SetActive(true);
         optionsPanel.position = mainCam.WorldToScreenPoint(building.transform.position);
         currentBuilding = building;
